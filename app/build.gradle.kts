@@ -16,17 +16,22 @@ val realAppId = prop("PICKIXO_ADMOB_APP_ID")
 val realBannerId = prop("PICKIXO_BANNER_ID")
 val realInterstitialId = prop("PICKIXO_INTERSTITIAL_ID")
 val privacyUrl = prop("PICKIXO_PRIVACY_URL")
+// true = release build with Google's test ads, ONLY for Play closed testing. Must be false for production.
+val allowTestAds = prop("PICKIXO_ALLOW_TEST_ADS").equals("true", ignoreCase = true)
 
 // Refuse to build a release with test ads or without a privacy policy (both get apps rejected).
 val buildingRelease = gradle.startParameter.taskNames.any { it.contains("Release", ignoreCase = true) }
 if (buildingRelease) {
-    val missing = listOf(
+    val required = mutableListOf("PICKIXO_PRIVACY_URL" to privacyUrl)
+    if (!allowTestAds) required += listOf(
         "PICKIXO_ADMOB_APP_ID" to realAppId, "PICKIXO_BANNER_ID" to realBannerId,
-        "PICKIXO_INTERSTITIAL_ID" to realInterstitialId, "PICKIXO_PRIVACY_URL" to privacyUrl,
-    ).filter { it.second.isEmpty() }.map { it.first }
+        "PICKIXO_INTERSTITIAL_ID" to realInterstitialId,
+    )
+    val missing = required.filter { it.second.isEmpty() }.map { it.first }
     if (missing.isNotEmpty()) {
         throw GradleException("Set these in gradle.properties before a release build: ${missing.joinToString()}")
     }
+    if (allowTestAds && realAppId.isEmpty()) logger.warn("WARNING: release build uses TEST ads (closed testing only)")
 }
 
 android {

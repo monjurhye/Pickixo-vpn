@@ -35,8 +35,13 @@ jobs:
       - name: Build debug APK (test ads)
         run: gradle assembleDebug --stacktrace
 
-      - name: Rename APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk PickixoVPN-debug.apk
+      - name: Build release AAB (unsigned; signed with the upload key afterwards)
+        run: gradle bundleRelease --stacktrace
+
+      - name: Rename outputs
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk PickixoVPN-debug.apk
+          cp app/build/outputs/bundle/release/app-release.aab PickixoVPN-release-unsigned.aab
 
       - uses: actions/upload-artifact@v4
         with:
@@ -49,4 +54,6 @@ jobs:
           tag_name: build-${{ github.run_number }}
           name: Pickixo VPN test build ${{ github.run_number }}
           prerelease: true
-          files: PickixoVPN-debug.apk
+          files: |
+            PickixoVPN-debug.apk
+            PickixoVPN-release-unsigned.aab
