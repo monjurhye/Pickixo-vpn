@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Pickixo VPN</string>
+
+    <!-- Main screen -->
+    <string name="status_disconnected">Not connected</string>
+    <string name="status_connecting">Connecting…</string>
+    <string name="status_connected">Connected · %1$s</string>
+    <string name="status_failed">Couldn\'t connect</string>
+    <string name="tap_to_connect">Tap the button to connect</string>
+    <string name="connect">Connect</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="cancel">Cancel</string>
+    <string name="retry">Try again</string>
+    <string name="server_ip">Server IP: %1$s</string>
+    <string name="status_finding_server">Finding a server…</string>
+    <string name="status_reconnecting">Connection dropped, reconnecting…</string>
+    <string name="status_trying">Trying %1$s server %2$d of %3$d…</string>
+    <string name="fastest_server">Fastest server</string>
+    <string name="auto_info">Best of %2$d servers in %1$d countries</string>
+    <string name="country_info">%1$d servers · %2$d ms</string>
+    <string name="no_servers_now">No servers right now. Pick another location.</string>
+    <string name="loading_servers">Loading servers…</string>
+    <string name="choose_location">Choose location</string>
+    <string name="refresh">Refresh</string>
+    <string name="refresh_servers">Refresh server list</string>
+    <string name="privacy_policy">Privacy policy</string>
+    <string name="ad_privacy">Ad privacy settings</string>
+    <string name="about">About</string>
+    <string name="vpngate_site">VPN Gate website</string>
+    <string name="free_servers_notice">Free servers by VPN Gate volunteers · Don\'t use for banking</string>
+    <string name="about_text">Pickixo VPN connects you to free public VPN servers run by volunteers of the VPN Gate Academic Experiment Project (University of Tsukuba, Japan). Pickixo is not affiliated with VPN Gate.\n\nPickixo does not collect your browsing activity. VPN Gate keeps connection logs as described in its policies.</string>
+
+    <!-- Errors -->
+    <string name="error_no_list">Couldn\'t download the server list. Check your internet connection.</string>
+    <string name="error_no_server">No server answered. Try another location.</string>
+    <string name="error_lost">The connection kept dropping. Try another location.</string>
+    <string name="error_permission">VPN permission was not granted.</string>
+
+    <!-- Notification -->
+    <string name="notif_channel">VPN status</string>
+    <string name="notif_title">Pickixo VPN is on</string>
+    <string name="notif_text">Connected to %1$s</string>
+
+    <!-- Disclosure (Google Play VpnService policy) -->
+    <string name="consent_title">Before you connect</string>
+    <string name="consent_intro">Pickixo VPN creates a VPN connection that sends all of your phone\'s internet traffic through a free public server, so websites see that server\'s location instead of yours.</string>
+    <string name="consent_points">• Servers are run by volunteers of the VPN Gate Academic Experiment Project (University of Tsukuba, Japan), not by Pickixo.\n\n• VPN Gate keeps connection logs for at least 3 months: your IP address, connection times, and the websites and IP addresses you connect to. Volunteer servers keep packet header logs for at least 2 weeks. These logs may be given to police or courts where the law allows.\n\n• Volunteer operators can see traffic that a website does not encrypt (non-HTTPS). Don\'t use Pickixo VPN for banking or other sensitive accounts.\n\n• Pickixo itself does not collect, store, share or sell your browsing activity.\n\n• Pickixo shows ads from Google AdMob. Ads use your normal connection, not the VPN, and Google may use device identifiers. You will be asked about this separately.</string>
+    <string name="consent_question">Tap \"I agree\" to let Pickixo VPN route your traffic through VPN Gate servers as described above.</string>
+    <string name="consent_privacy_link">Read the full privacy policy</string>
+    <string name="agree">I agree</string>
+    <string name="disagree">No thanks</string>
+    <string name="consent_declined_title">VPN can\'t be used</string>
+    <string name="consent_declined_text">Pickixo VPN only works by sending your traffic through VPN Gate servers. Without your agreement the app can\'t connect. You can review the information again or exit.</string>
+    <string name="consent_review">Review again</string>
+    <string name="exit">Exit</string>
+</resources>

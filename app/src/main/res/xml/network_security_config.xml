@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- VPN Gate only publishes its server list over plain HTTP. Everything else must use HTTPS.
+         Entries from this list are validated in ServerRepository before use. -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">www.vpngate.net</domain>
+    </domain-config>
+</network-security-config>

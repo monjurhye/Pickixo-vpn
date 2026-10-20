@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_top">#0E1024</color>
+    <color name="bg_bottom">#1C1846</color>
+    <color name="brand">#7C5CFF</color>
+    <color name="brand_dark">#5A3FE0</color>
+    <color name="accent">#22D3A6</color>
+    <color name="accent_dark">#0FA884</color>
+    <color name="warn">#F5A524</color>
+    <color name="warn_dark">#D9880C</color>
+    <color name="card">#22264A</color>
+    <color name="card_stroke">#33386A</color>
+    <color name="text">#FFFFFF</color>
+    <color name="text_secondary">#A9ADD1</color>
+    <color name="ad_bg">#0B0D1E</color>
+</resources>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Pickixo VPN</string>
+
+    <string name="status_disconnected">সংযুক্ত নয়</string>
+    <string name="status_connecting">সংযোগ হচ্ছে…</string>
+    <string name="status_connected">সংযুক্ত · %1$s</string>
+    <string name="status_failed">সংযোগ করা যায়নি</string>
+    <string name="tap_to_connect">সংযোগ করতে বোতামে ট্যাপ করুন</string>
+    <string name="connect">সংযোগ</string>
+    <string name="disconnect">বিচ্ছিন্ন করুন</string>
+    <string name="cancel">বাতিল</string>
+    <string name="retry">আবার চেষ্টা</string>
+    <string name="server_ip">সার্ভার IP: %1$s</string>
+    <string name="status_finding_server">সার্ভার খোঁজা হচ্ছে…</string>
+    <string name="status_reconnecting">সংযোগ বিচ্ছিন্ন হয়েছে, আবার সংযোগ হচ্ছে…</string>
+    <string name="status_trying">%1$s-এর সার্ভার %2$d / %3$d চেষ্টা করা হচ্ছে…</string>
+    <string name="fastest_server">দ্রুততম সার্ভার</string>
+    <string name="auto_info">%1$dটি দেশের %2$dটি সার্ভারের মধ্যে সেরাটি</string>
+    <string name="country_info">%1$dটি সার্ভার · %2$d ms</string>
+    <string name="no_servers_now">এখন কোনো সার্ভার নেই। অন্য লোকেশন বেছে নিন।</string>
+    <string name="loading_servers">সার্ভার লোড হচ্ছে…</string>
+    <string name="choose_location">লোকেশন বেছে নিন</string>
+    <string name="refresh">রিফ্রেশ</string>
+    <string name="refresh_servers">সার্ভার তালিকা রিফ্রেশ</string>
+    <string name="privacy_policy">প্রাইভেসি পলিসি</string>
+    <string name="ad_privacy">বিজ্ঞাপনের প্রাইভেসি সেটিংস</string>
+    <string name="about">সম্পর্কে</string>
+    <string name="vpngate_site">VPN Gate ওয়েবসাইট</string>
+    <string name="free_servers_notice">VPN Gate স্বেচ্ছাসেবকদের ফ্রি সার্ভার · ব্যাংকিংয়ে ব্যবহার করবেন না</string>
+    <string name="about_text">Pickixo VPN আপনাকে VPN Gate Academic Experiment Project (University of Tsukuba, জাপান)-এর স্বেচ্ছাসেবকদের চালানো ফ্রি পাবলিক VPN সার্ভারে যুক্ত করে। Pickixo, VPN Gate-এর অংশ নয়।\n\nPickixo আপনার ব্রাউজিং তথ্য সংগ্রহ করে না। VPN Gate তাদের নীতিমালা অনুযায়ী সংযোগের লগ রাখে।</string>
+
+    <string name="error_no_list">সার্ভার তালিকা ডাউনলোড করা যায়নি। ইন্টারনেট সংযোগ দেখুন।</string>
+    <string name="error_no_server">কোনো সার্ভার সাড়া দেয়নি। অন্য লোকেশন চেষ্টা করুন।</string>
+    <string name="error_lost">সংযোগ বারবার বিচ্ছিন্ন হচ্ছে। অন্য লোকেশন চেষ্টা করুন।</string>
+    <string name="error_permission">VPN-এর অনুমতি দেওয়া হয়নি।</string>
+
+    <string name="notif_channel">VPN অবস্থা</string>
+    <string name="notif_title">Pickixo VPN চালু আছে</string>
+    <string name="notif_text">%1$s-এ সংযুক্ত</string>
+
+    <string name="consent_title">সংযোগের আগে জেনে নিন</string>
+    <string name="consent_intro">Pickixo VPN একটি VPN সংযোগ তৈরি করে, যা আপনার ফোনের সব ইন্টারনেট ট্রাফিক একটি ফ্রি পাবলিক সার্ভারের মাধ্যমে পাঠায়। ফলে ওয়েবসাইটগুলো আপনার লোকেশনের বদলে সেই সার্ভারের লোকেশন দেখে।</string>
+    <string name="consent_points">• সার্ভারগুলো চালান VPN Gate Academic Experiment Project (University of Tsukuba, জাপান)-এর স্বেচ্ছাসেবকরা, Pickixo নয়।\n\n• VPN Gate কমপক্ষে ৩ মাস সংযোগের লগ রাখে: আপনার IP ঠিকানা, সংযোগের সময়, আর আপনি কোন ওয়েবসাইট ও IP-তে গেছেন। স্বেচ্ছাসেবকদের সার্ভারে কমপক্ষে ২ সপ্তাহ প্যাকেট হেডারের লগ থাকে। আইন অনুযায়ী এই লগ পুলিশ বা আদালতকে দেওয়া হতে পারে।\n\n• যে ট্রাফিক ওয়েবসাইট নিজে এনক্রিপ্ট করে না (HTTPS নয়), তা সার্ভারের মালিক দেখতে পারেন। ব্যাংকিং বা অন্য সংবেদনশীল অ্যাকাউন্টে Pickixo VPN ব্যবহার করবেন না।\n\n• Pickixo নিজে আপনার ব্রাউজিং তথ্য সংগ্রহ, সংরক্ষণ, শেয়ার বা বিক্রি করে না।\n\n• Pickixo-তে Google AdMob-এর বিজ্ঞাপন দেখানো হয়। বিজ্ঞাপন VPN নয়, আপনার সাধারণ সংযোগ ব্যবহার করে, এবং Google ডিভাইস আইডেন্টিফায়ার ব্যবহার করতে পারে। এ বিষয়ে আলাদাভাবে আপনার সম্মতি চাওয়া হবে।</string>
+    <string name="consent_question">ওপরে বর্ণিত উপায়ে আপনার ট্রাফিক VPN Gate সার্ভারের মাধ্যমে পাঠাতে Pickixo VPN-কে অনুমতি দিতে \"আমি রাজি\" ট্যাপ করুন।</string>
+    <string name="consent_privacy_link">পুরো প্রাইভেসি পলিসি পড়ুন</string>
+    <string name="agree">আমি রাজি</string>
+    <string name="disagree">না, ধন্যবাদ</string>
+    <string name="consent_declined_title">VPN ব্যবহার করা যাবে না</string>
+    <string name="consent_declined_text">Pickixo VPN শুধু VPN Gate সার্ভারের মাধ্যমে ট্রাফিক পাঠিয়েই কাজ করে। আপনার সম্মতি ছাড়া অ্যাপটি সংযোগ করতে পারবে না। আপনি তথ্যগুলো আবার পড়তে পারেন অথবা বের হয়ে যেতে পারেন।</string>
+    <string name="consent_review">আবার দেখুন</string>
+    <string name="exit">বের হন</string>
+</resources>

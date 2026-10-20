@@ -1,0 +1,34 @@
+To: the VPN Gate Academic Experiment Project (use the contact address listed on https://www.vpngate.net/)
+Subject: Permission request: free Android client app using VPN Gate public servers
+
+Dear VPN Gate team,
+
+I am an independent developer from Bangladesh. I have built a free Android app, "Pickixo VPN"
+(package com.pickixo.vpn), that lets users connect to VPN Gate public relay servers over MS-SSTP,
+using the server list at http://www.vpngate.net/api/iphone/ and the public "vpn"/"vpn" credentials.
+
+Before I publish it on Google Play, I would like to ask for your permission and follow any rules you have.
+
+How the app works:
+- It downloads the server list at most every 30 minutes and caches it on the phone.
+- Users choose a country, and the app connects to the highest-scored servers for that country.
+- It credits VPN Gate and the University of Tsukuba in the app and on the store listing, and links to vpngate.net.
+- Before first use, it clearly tells users that servers are volunteer-run, and that VPN Gate keeps connection
+  logs as described in your anti-abuse policy, and asks for their agreement.
+- The app is free. It shows Google AdMob ads inside the app to cover development costs. The VPN traffic itself
+  is not modified, and the app's own ad traffic does not go through the VPN.
+
+My questions:
+1. Do you allow a third-party app like this (free, with in-app ads) to use VPN Gate public servers?
+2. Are there any conditions I should follow, such as attribution wording, request-rate limits for the API,
+   or a required notice to users?
+3. Is there a preferred or HTTPS URL for the server list?
+
+I am happy to change anything you ask, or not to publish if you prefer.
+
+Thank you for running VPN Gate.
+
+Best regards,
+[Your name]
+Pickixo
+[Your email]
