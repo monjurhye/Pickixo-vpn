@@ -57,7 +57,7 @@ class MainActivity : Activity() {
             finish()
             return
         }
-        ConnLog.install()
+        ConnLog.install(this)
         setContentView(R.layout.activity_main)
         applySystemBarInsets(findViewById(R.id.root))
         status = findViewById(R.id.status)
@@ -74,6 +74,7 @@ class MainActivity : Activity() {
         findViewById<View>(R.id.locationCard).setOnClickListener { showCountryPicker() }
         findViewById<ImageButton>(R.id.menu).setOnClickListener { showMenu(it) }
 
+        ConnLog.takeCrashReport(this)?.let { showText(getString(R.string.crash_title), it) }
         Ads.gatherConsent(this)
         adContainer.post { Ads.showBanner(this, adContainer) }
         loadServers(force = false)
@@ -286,8 +287,9 @@ class MainActivity : Activity() {
         m.show()
     }
 
-    private fun showConnectionLog() {
-        val text = ConnLog.text()
+    private fun showConnectionLog() = showText(getString(R.string.connection_log), ConnLog.text())
+
+    private fun showText(title: String, text: String) {
         val tv = TextView(this).apply {
             this.text = text
             setTextIsSelectable(true)
@@ -299,7 +301,7 @@ class MainActivity : Activity() {
         }
         val scroll = android.widget.ScrollView(this).apply { addView(tv) }
         AlertDialog.Builder(this, R.style.Theme_Pickixo_Dialog)
-            .setTitle(R.string.connection_log)
+            .setTitle(title)
             .setView(scroll)
             .setPositiveButton(R.string.copy) { _, _ ->
                 val cm = getSystemService(android.content.ClipboardManager::class.java)

@@ -57,4 +57,5 @@
     <string name="connection_log">Connection log</string>
     <string name="copy">Copy</string>
     <string name="copied">Log copied</string>
+    <string name="crash_title">The app stopped last time. Please copy and send this</string>
 </resources>

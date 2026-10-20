@@ -53,4 +53,5 @@
     <string name="connection_log">সংযোগের লগ</string>
     <string name="copy">কপি</string>
     <string name="copied">লগ কপি হয়েছে</string>
+    <string name="crash_title">গতবার অ্যাপ বন্ধ হয়ে গিয়েছিল। এটা কপি করে পাঠান</string>
 </resources>

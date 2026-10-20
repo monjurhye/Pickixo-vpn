@@ -369,7 +369,7 @@ public final class SstpClient implements Closeable {
             }
         } catch (IOException e) {
             closeQuietly(closed ? closeReason : "Connection lost: " + e.getMessage());
-        } catch (RuntimeException e) {
+        } catch (Throwable e) {
             closeQuietly("Protocol error: " + e);
         }
     }
@@ -406,7 +406,9 @@ public final class SstpClient implements Closeable {
             Listener l = listener;
             boolean up;
             synchronized (this) { up = established; }
-            if (up && l != null && p.length > off) l.onIpPacket(p, off, p.length - off);
+            if (up && l != null && p.length > off) {
+                try { l.onIpPacket(p, off, p.length - off); } catch (RuntimeException e) { d("onIpPacket error: " + e); }
+            }
             return;
         }
         synchronized (this) {

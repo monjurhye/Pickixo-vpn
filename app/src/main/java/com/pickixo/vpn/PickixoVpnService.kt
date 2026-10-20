@@ -57,7 +57,7 @@ class PickixoVpnService : VpnService() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        ConnLog.install()
+        ConnLog.install(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -148,9 +148,9 @@ class PickixoVpnService : VpnService() {
             }
         } catch (e: InterruptedException) {
             // shutting down
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             if (!stopRequested) error = e.message ?: e.javaClass.simpleName
-            ConnLog.add("VPN stopped: ${e.message}")
+            ConnLog.add("VPN stopped: ${e.javaClass.simpleName}: ${e.message}\n" + Log.getStackTraceString(e))
             Log.w(TAG, "VPN stopped", e)
         } finally {
             client?.close()
@@ -205,8 +205,8 @@ class PickixoVpnService : VpnService() {
                             break
                         }
                         c.close()
-                    } catch (e: Exception) {
-                        ConnLog.add("${server.ip}:$port ${server.countryName} failed: ${e.message}")
+                    } catch (e: Throwable) {
+                        ConnLog.add("${server.ip}:$port ${server.countryName} failed: ${e.javaClass.simpleName}: ${e.message}")
                         c.close()
                     } finally {
                         attempts.remove(c)
@@ -263,7 +263,9 @@ class PickixoVpnService : VpnService() {
                 // The TUN fd is non-blocking, so a read can fail with EAGAIN; just poll again.
                 val len = try { input.read(packet) } catch (e: IOException) { 0 }
                 if (len > 0 && (packet[0].toInt() ushr 4) == 4) {
-                    try { c.sendIp(packet, 0, len) } catch (e: IOException) { break }
+                    try { c.sendIp(packet, 0, len) } catch (e: IOException) { break } catch (e: RuntimeException) {
+                        ConnLog.add("sendIp error: $e")
+                    }
                 }
             }
             val now = System.currentTimeMillis()
