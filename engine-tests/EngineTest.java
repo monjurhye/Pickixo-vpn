@@ -58,8 +58,11 @@ public class EngineTest {
             }
             Thread.sleep(500);
             check("tick alive", c.tick());
-            c.close();
+            long t0 = System.nanoTime();
+            c.close(); // must not block: on Android this is called from the main thread
+            check("close() returns immediately", (System.nanoTime() - t0) < 50_000_000L);
             check("closed", !c.isAlive());
+            Thread.sleep(500);
         }
         System.out.println(fails == 0 ? "ALL PASS" : fails + " FAILED");
         System.exit(fails == 0 ? 0 : 1);

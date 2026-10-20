@@ -101,6 +101,7 @@ public final class SstpClient implements Closeable {
     private OutputStream out;
     private final Object writeLock = new Object();
     private volatile boolean closed;
+    private volatile boolean closing;
     private volatile String closeReason;
     private volatile long lastReceive, lastSend;
     private volatile Listener listener;
@@ -154,7 +155,7 @@ public final class SstpClient implements Closeable {
             raw = new Socket();
             if (protector != null && !protector.protect(raw)) throw new IOException("Could not protect socket");
             raw.connect(new InetSocketAddress(host, port), connectTimeoutMs);
-            if (closed) throw new IOException("Cancelled");
+            if (closed || closing) throw new IOException("Cancelled");
             d("tcp connected");
             raw.setTcpNoDelay(true);
             raw.setSoTimeout(handshakeTimeoutMs);
@@ -170,7 +171,7 @@ public final class SstpClient implements Closeable {
             certHash1 = MessageDigest.getInstance("SHA-1").digest(der);
             d("tls " + ssl.getSession().getProtocol() + " " + ssl.getSession().getCipherSuite());
 
-            if (closed) throw new IOException("Cancelled");
+            if (closed || closing) throw new IOException("Cancelled");
             in = new DataInputStream(new java.io.BufferedInputStream(ssl.getInputStream(), 16384));
             out = ssl.getOutputStream();
 
@@ -218,7 +219,7 @@ public final class SstpClient implements Closeable {
 
     /** Call about once a second. Returns false once the tunnel is dead. */
     public boolean tick() {
-        if (closed) return false;
+        if (closed || closing) return false;
         long now = System.currentTimeMillis();
         if (now - lastReceive > DEAD_MS) {
             closeQuietly("Server stopped responding");
@@ -230,25 +231,37 @@ public final class SstpClient implements Closeable {
         return true;
     }
 
-    public boolean isAlive() { return !closed; }
+    public boolean isAlive() { return !closed && !closing; }
 
     public String closeReason() { return closeReason; }
 
+    /**
+     * Closes the tunnel. Safe to call from any thread, including Android's main thread: the goodbye
+     * messages and socket shutdown are network I/O, so they always run on a background thread.
+     */
     @Override
     public void close() {
-        if (closed) return;
-        try {
-            synchronized (this) {
-                if (established) {
-                    byte[] term = {TERM_REQ, (byte) nextId(), 0, 4};
-                    writeData(PROTO_LCP, term, 0, 4);
-                    writeControl(MSG_DISCONNECT, null);
+        if (closed || closing) return;
+        closing = true;
+        Thread t = new Thread(() -> {
+            try {
+                synchronized (this) {
+                    if (established && !closed) {
+                        byte[] term = {TERM_REQ, (byte) nextId(), 0, 4};
+                        writeData(PROTO_LCP, term, 0, 4);
+                        writeControl(MSG_DISCONNECT, null);
+                    }
                 }
+            } catch (IOException | RuntimeException ignored) {
             }
-        } catch (IOException ignored) {
-        }
-        closeQuietly("closed by user");
+            closeQuietly("closed by user");
+        }, "sstp-close");
+        t.setDaemon(true);
+        t.start();
     }
+
+    /** True once close() was requested (the socket may still be shutting down). */
+    public boolean isClosing() { return closing || closed; }
 
     // =====================================================================================
     // TLS, HTTP and SSTP control phase
