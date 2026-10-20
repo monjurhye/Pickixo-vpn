@@ -50,4 +50,7 @@
     <string name="consent_declined_text">Pickixo VPN শুধু VPN Gate সার্ভারের মাধ্যমে ট্রাফিক পাঠিয়েই কাজ করে। আপনার সম্মতি ছাড়া অ্যাপটি সংযোগ করতে পারবে না। আপনি তথ্যগুলো আবার পড়তে পারেন অথবা বের হয়ে যেতে পারেন।</string>
     <string name="consent_review">আবার দেখুন</string>
     <string name="exit">বের হন</string>
+    <string name="connection_log">সংযোগের লগ</string>
+    <string name="copy">কপি</string>
+    <string name="copied">লগ কপি হয়েছে</string>
 </resources>

@@ -57,6 +57,7 @@ class MainActivity : Activity() {
             finish()
             return
         }
+        ConnLog.install()
         setContentView(R.layout.activity_main)
         applySystemBarInsets(findViewById(R.id.root))
         status = findViewById(R.id.status)
@@ -265,12 +266,14 @@ class MainActivity : Activity() {
         m.menu.add(0, 1, 0, R.string.refresh_servers)
         m.menu.add(0, 2, 0, R.string.privacy_policy)
         if (Ads.privacyOptionsRequired(this)) m.menu.add(0, 3, 0, R.string.ad_privacy)
+        m.menu.add(0, 5, 0, R.string.connection_log)
         m.menu.add(0, 4, 0, R.string.about)
         m.setOnMenuItemClickListener {
             when (it.itemId) {
                 1 -> loadServers(force = true)
                 2 -> openUrl(BuildConfig.PRIVACY_URL)
                 3 -> Ads.showPrivacyOptions(this)
+                5 -> showConnectionLog()
                 4 -> AlertDialog.Builder(this, R.style.Theme_Pickixo_Dialog)
                     .setTitle(getString(R.string.app_name) + " " + BuildConfig.VERSION_NAME)
                     .setMessage(R.string.about_text)
@@ -281,6 +284,31 @@ class MainActivity : Activity() {
             true
         }
         m.show()
+    }
+
+    private fun showConnectionLog() {
+        val text = ConnLog.text()
+        val tv = TextView(this).apply {
+            this.text = text
+            setTextIsSelectable(true)
+            typeface = android.graphics.Typeface.MONOSPACE
+            textSize = 11f
+            setTextColor(getColor(R.color.text_secondary))
+            val pad = (16 * resources.displayMetrics.density).toInt()
+            setPadding(pad, pad / 2, pad, pad / 2)
+        }
+        val scroll = android.widget.ScrollView(this).apply { addView(tv) }
+        AlertDialog.Builder(this, R.style.Theme_Pickixo_Dialog)
+            .setTitle(R.string.connection_log)
+            .setView(scroll)
+            .setPositiveButton(R.string.copy) { _, _ ->
+                val cm = getSystemService(android.content.ClipboardManager::class.java)
+                cm?.setPrimaryClip(android.content.ClipData.newPlainText("Pickixo VPN log", text))
+                Toast.makeText(this, R.string.copied, Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+        scroll.post { scroll.fullScroll(View.FOCUS_DOWN) }
     }
 
     private fun openUrl(url: String) {

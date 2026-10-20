@@ -42,8 +42,8 @@ android {
         applicationId = "com.pickixo.vpn"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         manifestPlaceholders["admobAppId"] = testAppId
         buildConfigField("String", "BANNER_ID", "\"$testBannerId\"")

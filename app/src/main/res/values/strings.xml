@@ -54,4 +54,7 @@
     <string name="consent_declined_text">Pickixo VPN only works by sending your traffic through VPN Gate servers. Without your agreement the app can\'t connect. You can review the information again or exit.</string>
     <string name="consent_review">Review again</string>
     <string name="exit">Exit</string>
+    <string name="connection_log">Connection log</string>
+    <string name="copy">Copy</string>
+    <string name="copied">Log copied</string>
 </resources>

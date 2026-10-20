@@ -19,6 +19,12 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.net.InetAddress
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
 
 class PickixoVpnService : VpnService() {
@@ -30,7 +36,8 @@ class PickixoVpnService : VpnService() {
         private const val NOTIFICATION_ID = 7
         private const val VPN_USER = "vpn"       // VPN Gate's public credentials
         private const val VPN_PASSWORD = "vpn"
-        private const val MAX_SERVERS_TO_TRY = 8
+        private const val MAX_SERVERS_TO_TRY = 12
+        private const val PARALLEL = 4
         private const val MAX_RECONNECTS = 3
 
         @Volatile var instance: PickixoVpnService? = null
@@ -40,6 +47,7 @@ class PickixoVpnService : VpnService() {
     @Volatile private var stopRequested = false
     @Volatile private var destroyed = false
     @Volatile private var client: SstpClient? = null
+    private val attempts: MutableSet<SstpClient> = ConcurrentHashMap.newKeySet()
     @Volatile private var tunOut: FileOutputStream? = null
     @Volatile private var pendingCountry: String? = null
     private var currentCountry: String? = null
@@ -49,6 +57,7 @@ class PickixoVpnService : VpnService() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        ConnLog.install()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -75,12 +84,14 @@ class PickixoVpnService : VpnService() {
         pendingCountry = country
         stopRequested = true
         client?.close()
+        attempts.forEach { it.close() }
     }
 
     fun disconnect() {
         pendingCountry = null
         stopRequested = true
         client?.close()
+        attempts.forEach { it.close() }
         if (worker?.isAlive != true) stopSelf()
     }
 
@@ -106,6 +117,7 @@ class PickixoVpnService : VpnService() {
         try {
             if (!ServerRepository.loadCached(this) || ServerRepository.isStale()) ServerRepository.refresh(this)
             if (ServerRepository.servers.isEmpty()) throw IOException(getString(R.string.error_no_list))
+            ConnLog.add("Server list: ${ServerRepository.servers.size} servers, Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
 
             var reconnects = 0
             while (!stopRequested) {
@@ -138,6 +150,7 @@ class PickixoVpnService : VpnService() {
             // shutting down
         } catch (e: Exception) {
             if (!stopRequested) error = e.message ?: e.javaClass.simpleName
+            ConnLog.add("VPN stopped: ${e.message}")
             Log.w(TAG, "VPN stopped", e)
         } finally {
             client?.close()
@@ -156,30 +169,64 @@ class PickixoVpnService : VpnService() {
         }
     }
 
+    /** Tries the best servers [PARALLEL] at a time; the first one that finishes the handshake wins. */
     private fun connectAny(country: String): Triple<SstpClient, SstpClient.Result, Server>? {
         val candidates = ServerRepository.candidates(country).take(MAX_SERVERS_TO_TRY)
-        candidates.forEachIndexed { index, server ->
-            for (port in server.ports) {
-                if (stopRequested) return null
-                VpnState.set(VpnStatus.Connecting(country,
-                    getString(R.string.status_trying, server.countryName, index + 1, candidates.size)))
-                val c = SstpClient(server.ip, port, VPN_USER, VPN_PASSWORD)
-                client = c // lets disconnect() abort a connection attempt in progress
-                try {
-                    val r = c.connect({ protect(it) }, object : SstpClient.Listener {
-                        override fun onIpPacket(buf: ByteArray, off: Int, len: Int) {
-                            try { tunOut?.write(buf, off, len) } catch (ignored: IOException) {}
-                        }
-                        override fun onClosed(reason: String?) {}
-                    }, 4000, 15000)
-                    return Triple(c, r, server)
-                } catch (e: IOException) {
-                    Log.i(TAG, "${server.ip}:$port failed: ${e.message}")
-                    c.close()
+        if (candidates.isEmpty()) return null
+        ConnLog.add("Connecting to ${candidates.size} candidate servers for $country")
+        val winner = AtomicReference<Triple<SstpClient, SstpClient.Result, Server>?>(null)
+        val tried = AtomicInteger(0)
+        val pool = Executors.newFixedThreadPool(PARALLEL)
+        val done = CountDownLatch(candidates.size)
+        val listener = object : SstpClient.Listener {
+            override fun onIpPacket(buf: ByteArray, off: Int, len: Int) {
+                try { tunOut?.write(buf, off, len) } catch (ignored: IOException) {}
+            }
+            override fun onClosed(reason: String?) {}
+        }
+        for (server in candidates) pool.execute {
+            try {
+                val n = tried.incrementAndGet()
+                if (!stopRequested && winner.get() == null) {
+                    VpnState.set(VpnStatus.Connecting(country,
+                        getString(R.string.status_trying, server.countryName, n, candidates.size)))
                 }
+                for (port in server.ports) {
+                    if (stopRequested || winner.get() != null) break
+                    val c = SstpClient(server.ip, port, VPN_USER, VPN_PASSWORD)
+                    attempts.add(c) // lets disconnect() abort attempts in progress
+                    try {
+                        // Our own app is excluded from the VPN, so protect() is only a safeguard; a false
+                        // result must not abort the attempt.
+                        val r = c.connect({ sock -> if (!protect(sock)) ConnLog.add("protect() returned false"); true },
+                            listener, 5000, 20000)
+                        if (winner.compareAndSet(null, Triple(c, r, server))) {
+                            ConnLog.add("Connected to ${server.ip}:$port (${server.countryName}), auth ${r.auth}")
+                            break
+                        }
+                        c.close()
+                    } catch (e: Exception) {
+                        ConnLog.add("${server.ip}:$port ${server.countryName} failed: ${e.message}")
+                        c.close()
+                    } finally {
+                        attempts.remove(c)
+                    }
+                }
+            } finally {
+                done.countDown()
             }
         }
-        return null
+        pool.shutdown()
+        // Wait until someone wins, everything has failed, or we are told to stop.
+        while (winner.get() == null && !stopRequested && !done.await(200, TimeUnit.MILLISECONDS)) { /* wait */ }
+        val w = winner.get()
+        if (w == null || stopRequested) {
+            w?.first?.close()
+            attempts.forEach { it.close() }
+            return null
+        }
+        attempts.forEach { if (it !== w.first) it.close() }
+        return w
     }
 
     private fun establish(r: SstpClient.Result, server: Server): ParcelFileDescriptor {
