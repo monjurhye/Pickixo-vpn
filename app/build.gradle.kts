@@ -51,6 +51,16 @@ android {
         buildConfigField("String", "PRIVACY_URL", "\"${privacyUrl.ifEmpty { "https://www.vpngate.net/en/about_abuse.aspx" }}\"")
     }
 
+    // A fixed debug key (not secret) so every CI test build installs over the previous one.
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
