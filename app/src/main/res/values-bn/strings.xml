@@ -31,7 +31,7 @@
     <string name="about_text">Pickixo VPN আপনাকে VPN Gate Academic Experiment Project (University of Tsukuba, জাপান)-এর স্বেচ্ছাসেবকদের চালানো ফ্রি পাবলিক VPN সার্ভারে যুক্ত করে। Pickixo, VPN Gate-এর অংশ নয়।\n\nPickixo আপনার ব্রাউজিং তথ্য সংগ্রহ করে না। VPN Gate তাদের নীতিমালা অনুযায়ী সংযোগের লগ রাখে।</string>
 
     <string name="error_no_list">সার্ভার তালিকা ডাউনলোড করা যায়নি। ইন্টারনেট সংযোগ দেখুন।</string>
-    <string name="error_no_server">কোনো সার্ভার সাড়া দেয়নি। অন্য লোকেশন চেষ্টা করুন।</string>
+    <string name="error_no_server">এই লোকেশনের সার্ভার এখন সাড়া দিচ্ছে না (কিছু দেশ VPN সংযোগ ব্লক করে)। Japan, Korea বা দ্রুততম সার্ভার চেষ্টা করুন।</string>
     <string name="error_lost">সংযোগ বারবার বিচ্ছিন্ন হচ্ছে। অন্য লোকেশন চেষ্টা করুন।</string>
     <string name="error_permission">VPN-এর অনুমতি দেওয়া হয়নি।</string>
 

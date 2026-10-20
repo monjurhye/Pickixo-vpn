@@ -65,6 +65,50 @@ public final class VpnGateParser {
         return out;
     }
 
+    private static final java.util.regex.Pattern ROW_IP =
+            java.util.regex.Pattern.compile("\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b");
+    private static final java.util.regex.Pattern SSTP_HOST =
+            java.util.regex.Pattern.compile("SSTP Hostname\\s*:\\s*[A-Za-z0-9.\\-]+?\\.opengw\\.net(?::(\\d{1,5}))?");
+
+    /**
+     * Reads the HTML server table on https://www.vpngate.net/en/ and returns, per server IP, the TCP
+     * port it accepts MS-SSTP on, or -1 if the server is listed without SSTP support.
+     */
+    public static java.util.Map<String, Integer> sstpPortsFromHtml(String html) {
+        java.util.Map<String, Integer> map = new java.util.HashMap<>();
+        for (String row : html.split("(?i)<tr")) {
+            String text = row.replaceAll("<[^>]+>", " ").replace("&nbsp;", " ").replaceAll("\\s+", " ");
+            java.util.regex.Matcher ip = ROW_IP.matcher(text);
+            String found = null;
+            while (ip.find()) { if (isPublicIpv4(ip.group(1))) { found = ip.group(1); break; } }
+            if (found == null || !text.contains("opengw.net")) continue;
+            java.util.regex.Matcher m = SSTP_HOST.matcher(text);
+            int port = -1;
+            if (m.find()) {
+                port = m.group(1) == null ? 443 : Integer.parseInt(m.group(1));
+                if (port < 1 || port > 65535) port = -1;
+            }
+            map.put(found, port);
+        }
+        return map;
+    }
+
+    /**
+     * Uses the SSTP ports from the HTML list: servers listed without SSTP are dropped, servers with a
+     * known SSTP port try only that port, and servers missing from the HTML keep their guessed ports.
+     */
+    public static List<Server> applySstpPorts(List<Server> servers, java.util.Map<String, Integer> sstp) {
+        if (sstp == null || sstp.isEmpty()) return servers;
+        List<Server> out = new ArrayList<>();
+        for (Server s : servers) {
+            Integer port = sstp.get(s.ip);
+            if (port == null) out.add(s);
+            else if (port > 0) out.add(new Server(s.hostName, s.ip, s.score, s.ping, s.speed, s.countryName,
+                    s.countryCode, s.sessions, java.util.Collections.singletonList(port)));
+        }
+        return out;
+    }
+
     /**
      * SoftEther (which VPN Gate runs) accepts SSTP on each of its TCP listener ports. The OpenVPN
      * profile tells us one listener; 443 is the usual SSTP port.

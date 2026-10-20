@@ -158,7 +158,9 @@ public final class SstpClient implements Closeable {
             if (closed || closing) throw new IOException("Cancelled");
             d("tcp connected");
             raw.setTcpNoDelay(true);
-            raw.setSoTimeout(handshakeTimeoutMs);
+            // A server that accepts TCP but never answers TLS (typical when a firewall blocks VPNs)
+            // should fail fast so the next server can be tried.
+            raw.setSoTimeout(Math.min(handshakeTimeoutMs, 8000));
 
             ssl = (SSLSocket) trustAllContext().getSocketFactory().createSocket(raw, host, port, true);
             ssl.setUseClientMode(true);

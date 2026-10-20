@@ -17,6 +17,17 @@ public class ParserTest {
     for (VpnGateParser.Server s : l) System.out.println(s.ip+" "+s.countryCode+" "+s.countryName+" score="+s.score+" ping="+s.ping+" ports="+s.ports);
     boolean ok = l.size()==3 && l.get(0).ports.equals(List.of(1443,443)) && l.get(1).ports.equals(List.of(443))
        && l.get(1).countryCode.equals("KR") && l.get(2).ports.equals(List.of(443)) && l.get(2).ping==0;
+    String html = "<table><tr><td class='vg_table_row_1'><img src='flag.png'/><br>Russian Federation</td><td><b><span style='font-size: 10pt;'>vpn687902218.opengw.net</span></b><br><span style='font-size: 10pt;'>219.100.37.1</span></td>"
+      + "<td>MS-SSTP<br><a href='x'>Connect guide</a><br><span>SSTP Hostname :<br /><b><span style='color: #006600;'>vpn687902218.opengw.net:1443</span></b></span></td></tr>"
+      + "<tr><td>Korea</td><td>vpn2.opengw.net<br>1.2.3.4</td><td>OpenVPN Config file UDP: 1194</td></tr>"
+      + "<tr><td>US</td><td>vpn3.opengw.net<br>8.8.4.4</td><td>SSTP Hostname : vpn3.opengw.net</td></tr></table>";
+    java.util.Map<String,Integer> m = VpnGateParser.sstpPortsFromHtml(html);
+    System.out.println("html map: " + m);
+    List<VpnGateParser.Server> merged = VpnGateParser.applySstpPorts(l, m);
+    for (VpnGateParser.Server s : merged) System.out.println("merged " + s.ip + " ports=" + s.ports);
+    ok = ok && Integer.valueOf(1443).equals(m.get("219.100.37.1")) && Integer.valueOf(-1).equals(m.get("1.2.3.4"))
+       && Integer.valueOf(443).equals(m.get("8.8.4.4")) && merged.size() == 2
+       && merged.get(0).ports.equals(List.of(1443)) && merged.get(1).ports.equals(List.of(443));
     System.out.println(ok ? "PARSER PASS" : "PARSER FAIL");
   }
 }

@@ -33,7 +33,7 @@
 
     <!-- Errors -->
     <string name="error_no_list">Couldn\'t download the server list. Check your internet connection.</string>
-    <string name="error_no_server">No server answered. Try another location.</string>
+    <string name="error_no_server">Servers in this location aren\'t answering right now (some countries block VPN connections). Try Japan, Korea or Fastest server.</string>
     <string name="error_lost">The connection kept dropping. Try another location.</string>
     <string name="error_permission">VPN permission was not granted.</string>
 

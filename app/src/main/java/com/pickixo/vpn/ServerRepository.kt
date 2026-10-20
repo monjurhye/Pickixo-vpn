@@ -18,6 +18,8 @@ object ServerRepository {
     const val AUTO = "AUTO"
     private const val API = "http://www.vpngate.net/api/iphone/"
     private const val CACHE = "vpngate_servers.csv"
+    private const val HTML_URL = "https://www.vpngate.net/en/"
+    private const val HTML_CACHE = "vpngate_list.html"
     private const val MAX_AGE_MS = 30 * 60 * 1000L
 
     @Volatile var servers: List<Server> = emptyList()
@@ -34,7 +36,8 @@ object ServerRepository {
         val f = cacheFile(ctx)
         if (!f.exists()) return false
         return try {
-            val list = VpnGateParser.parse(f.readText())
+            val html = File(ctx.filesDir, HTML_CACHE).takeIf { it.exists() }?.readText()
+            val list = withSstp(VpnGateParser.parse(f.readText()), html)
             if (list.isNotEmpty()) {
                 servers = list
                 updatedAt = f.lastModified()
@@ -47,28 +50,41 @@ object ServerRepository {
 
     fun isStale(): Boolean = servers.isEmpty() || System.currentTimeMillis() - updatedAt > MAX_AGE_MS
 
-    /** Downloads a fresh list. Blocking: call from a background thread. */
-    fun refresh(ctx: Context): Boolean {
-        val conn = URL(API).openConnection() as HttpURLConnection
+    private fun withSstp(list: List<Server>, html: String?): List<Server> =
+        if (html.isNullOrEmpty()) list
+        else VpnGateParser.applySstpPorts(list, VpnGateParser.sstpPortsFromHtml(html)).ifEmpty { list }
+
+    private fun download(url: String): String? {
+        val conn = URL(url).openConnection() as HttpURLConnection
         return try {
             conn.connectTimeout = 15_000
             conn.readTimeout = 20_000
             conn.setRequestProperty("User-Agent", "PickixoVPN/${BuildConfig.VERSION_NAME}")
-            if (conn.responseCode != 200) return false
-            val text = conn.inputStream.use { it.readBytes().toString(Charsets.UTF_8) }
-            val list = VpnGateParser.parse(text)
-            if (list.isEmpty()) return false
-            synchronized(this) {
-                cacheFile(ctx).writeText(text)
-                servers = list
-                updatedAt = System.currentTimeMillis()
-            }
-            true
+            if (conn.responseCode != 200) null
+            else conn.inputStream.use { it.readBytes().toString(Charsets.UTF_8) }
         } catch (e: Exception) {
-            false
+            null
         } finally {
             conn.disconnect()
         }
+    }
+
+    /** Downloads a fresh list. Blocking: call from a background thread. */
+    fun refresh(ctx: Context): Boolean {
+        val text = download(API) ?: return false
+        val parsed = VpnGateParser.parse(text)
+        if (parsed.isEmpty()) return false
+        // The HTML table says which servers really offer SSTP, and on which port. Optional.
+        val html = download(HTML_URL)
+        val list = withSstp(parsed, html)
+        synchronized(this) {
+            cacheFile(ctx).writeText(text)
+            if (html != null) File(ctx.filesDir, HTML_CACHE).writeText(html)
+            servers = list
+            updatedAt = System.currentTimeMillis()
+        }
+        ConnLog.add("Server list: ${parsed.size} servers, ${list.size} with SSTP" + if (html == null) " (HTML list unavailable)" else "")
+        return true
     }
 
     fun countries(): List<Country> =

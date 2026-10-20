@@ -24,8 +24,8 @@ jobs:
       - name: Probe real VPN Gate servers over SSTP
         run: |
           mkdir out
-          javac -d out app/src/main/java/com/pickixo/vpn/sstp/*.java engine-tests/LiveProbe.java
-          timeout 900 java -Djdk.tls.disabledAlgorithms= -cp out com.pickixo.vpn.sstp.LiveProbe ${{ github.event.inputs.servers || '20' }} android || true
+          javac -d out app/src/main/java/com/pickixo/vpn/sstp/*.java engine-tests/LiveProbe.java engine-tests/AppProbe.java
+          timeout 900 java -cp out com.pickixo.vpn.sstp.AppProbe || true
           tail -3 probe-report.txt
       - uses: softprops/action-gh-release@v2
         with:
