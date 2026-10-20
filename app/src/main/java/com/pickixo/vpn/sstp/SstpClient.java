@@ -41,6 +41,9 @@ public final class SstpClient implements Closeable {
 
     public interface SocketProtector { boolean protect(Socket socket); }
 
+    /** Test hook: restrict TLS cipher suites (e.g. to Android's defaults). Null = platform default. */
+    public static volatile String[] forcedCipherSuites;
+
     /** Optional diagnostics sink (Logcat on Android, stdout in tests). Null = silent. */
     public static volatile java.util.function.Consumer<String> debug;
 
@@ -158,6 +161,8 @@ public final class SstpClient implements Closeable {
 
             ssl = (SSLSocket) trustAllContext().getSocketFactory().createSocket(raw, host, port, true);
             ssl.setUseClientMode(true);
+            String[] forced = forcedCipherSuites;
+            if (forced != null) ssl.setEnabledCipherSuites(forced);
             ssl.startHandshake();
             Certificate[] chain = ssl.getSession().getPeerCertificates();
             byte[] der = chain[0].getEncoded();

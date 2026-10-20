@@ -21,6 +21,18 @@ public class LiveProbe {
 
     public static void main(String[] a) throws Exception {
         int limit = a.length > 0 ? Integer.parseInt(a[0]) : 30;
+        if (a.length > 1 && a[1].equals("android")) {
+            // Android 10+ (Conscrypt) default suites: no DHE key exchange.
+            SstpClient.forcedCipherSuites = new String[]{
+                "TLS_AES_128_GCM_SHA256", "TLS_AES_256_GCM_SHA384", "TLS_CHACHA20_POLY1305_SHA256",
+                "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+                "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+                "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256", "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256",
+                "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA",
+                "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+                "TLS_RSA_WITH_AES_128_GCM_SHA256", "TLS_RSA_WITH_AES_256_GCM_SHA384",
+                "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA"};
+        }
         PrintStream out = new PrintStream(new FileOutputStream("probe-report.txt"), true, "UTF-8");
         String csv = fetch("http://www.vpngate.net/api/iphone/");
         List<VpnGateParser.Server> servers = VpnGateParser.parse(csv);

@@ -25,7 +25,7 @@ jobs:
         run: |
           mkdir out
           javac -d out app/src/main/java/com/pickixo/vpn/sstp/*.java engine-tests/LiveProbe.java
-          timeout 900 java -cp out com.pickixo.vpn.sstp.LiveProbe ${{ github.event.inputs.servers || '40' }} || true
+          timeout 900 java -Djdk.tls.disabledAlgorithms= -cp out com.pickixo.vpn.sstp.LiveProbe ${{ github.event.inputs.servers || '20' }} android || true
           tail -3 probe-report.txt
       - uses: softprops/action-gh-release@v2
         with:
