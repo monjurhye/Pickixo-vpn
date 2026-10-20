@@ -89,7 +89,7 @@
 **Store listing:** সব লেখা আর ছবি তৈরি করা আছে। কোন ছবি কোথায় যাবে আর কোন লেখা কোন ঘরে পেস্ট করবেন, সব আছে **`docs/ASO_STORE_LISTING.md`**-এ:
 - App icon: `store/icon-512.png`
 - Feature graphic: `store/feature-graphic-en.png` (বাংলা listing-এ `feature-graphic-bn.png`)
-- Screenshots: `store/screenshots/en/` আর `store/screenshots/bn/`, প্রতিটিতে ৬টি
+- Screenshots: `store/screenshots/en/` আর `store/screenshots/bn/`, প্রতিটিতে ৭টি
 - App name, short আর full description: ইংরেজি ও বাংলা দুটোই
 - Category: **Tools**
 
