@@ -15,6 +15,7 @@ from cryptography.hazmat.primitives.ciphers import Cipher, modes
 from cryptography.hazmat.decrepit.ciphers.algorithms import TripleDES
 
 USER, PASSWORD = "vpn", "vpn"
+FLOOD_MB = int(os.environ.get("FLOOD_MB", "0"))
 LOG = []
 def check(name, ok):
     print(f"CHECK {name}: {'PASS' if ok else 'FAIL'}", flush=True)
@@ -242,6 +243,14 @@ class Session:
         reply = d[:12] + d[16:20] + d[12:16] + d[20:]
         self.echoed += 1
         self.data(0x0021, reply)
+        if FLOOD_MB and self.echoed == 3:
+            pkt = bytes([0x45]) + b"\0" * 11 + bytes([1, 2, 3, 4]) + bytes([10, 0, 0, 5]) + b"x" * (1400 - 20)
+            body = b"\xff\x03" + struct.pack(">H", 0x0021) + pkt
+            frame = struct.pack(">BBH", 0x10, 0, 4 + len(body)) + body
+            batch = frame * 64
+            n = FLOOD_MB * 1024 * 1024 // (1400 * 64)
+            for _ in range(n): self.send(batch)
+            self.data(0x0021, bytes([0x45]) + b"\0" * 11 + bytes([1, 2, 3, 4]) + bytes([10, 0, 0, 5]) + b"END!")
 
 def main():
     port, auth = int(sys.argv[1]), sys.argv[2]
