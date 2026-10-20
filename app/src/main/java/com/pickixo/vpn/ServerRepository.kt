@@ -89,15 +89,18 @@ object ServerRepository {
 
     fun countries(): List<Country> =
         servers.groupBy { it.countryCode }
-            .map { (code, list) -> Country(code, list.first().countryName, list.sortedByDescending { it.score }) }
+            .map { (code, list) -> Country(code, list.first().countryName, list) }
             .sortedWith(compareByDescending<Country> { it.servers.size }.thenBy { it.name })
 
     fun country(code: String): Country? = countries().firstOrNull { it.code == code }
 
-    /** Servers to try for a location, best first. */
+    /**
+     * Servers to try for a location, best first: the most measured bandwidth per connected user
+     * (VPN Gate's own speed test divided by its current sessions), then VPN Gate's score.
+     */
     fun candidates(code: String): List<Server> {
         val pool = if (code == AUTO) servers else servers.filter { it.countryCode == code }
-        return pool.sortedByDescending { it.score }
+        return pool.sortedWith(compareByDescending<Server> { it.speed / (it.sessions + 1) }.thenByDescending { it.score })
     }
 }
 

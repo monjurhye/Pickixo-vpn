@@ -17,7 +17,6 @@
     <string name="status_trying">%1$s-এর সার্ভার %2$d / %3$d চেষ্টা করা হচ্ছে…</string>
     <string name="fastest_server">দ্রুততম সার্ভার</string>
     <string name="auto_info">%1$dটি দেশের %2$dটি সার্ভারের মধ্যে সেরাটি</string>
-    <string name="country_info">%1$dটি সার্ভার · %2$d ms</string>
     <string name="no_servers_now">এখন কোনো সার্ভার নেই। অন্য লোকেশন বেছে নিন।</string>
     <string name="loading_servers">সার্ভার লোড হচ্ছে…</string>
     <string name="choose_location">লোকেশন বেছে নিন</string>
@@ -54,4 +53,8 @@
     <string name="copy">কপি</string>
     <string name="copied">লগ কপি হয়েছে</string>
     <string name="crash_title">গতবার অ্যাপ বন্ধ হয়ে গিয়েছিল। এটা কপি করে পাঠান</string>
+    <plurals name="server_count">
+        <item quantity="one">%dটি সার্ভার</item>
+        <item quantity="other">%dটি সার্ভার</item>
+    </plurals>
 </resources>

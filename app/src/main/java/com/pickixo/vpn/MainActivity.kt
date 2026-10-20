@@ -223,7 +223,7 @@ class MainActivity : Activity() {
             countryInfo.text = when {
                 total == 0 -> getString(R.string.loading_servers)
                 c == null -> getString(R.string.no_servers_now)
-                else -> getString(R.string.country_info, c.servers.size, c.bestPing)
+                else -> resources.getQuantityString(R.plurals.server_count, c.servers.size, c.servers.size)
             }
         }
     }
@@ -243,7 +243,7 @@ class MainActivity : Activity() {
                 v.findViewById<TextView>(R.id.itemName).text = c?.name ?: getString(R.string.fastest_server)
                 v.findViewById<TextView>(R.id.itemInfo).text =
                     if (c == null) getString(R.string.auto_info, countries.size, ServerRepository.servers.size)
-                    else getString(R.string.country_info, c.servers.size, c.bestPing)
+                    else resources.getQuantityString(R.plurals.server_count, c.servers.size, c.servers.size)
                 val selected = (c?.code ?: ServerRepository.AUTO) == Prefs.country(this@MainActivity)
                 v.findViewById<View>(R.id.itemCheck).visibility = if (selected) View.VISIBLE else View.INVISIBLE
                 return v
