@@ -1,0 +1,35 @@
+name: Live VPN Gate probe
+
+on:
+  workflow_dispatch:
+    inputs:
+      servers:
+        description: "How many servers to test"
+        default: "40"
+  push:
+    branches: [diag]
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Probe real VPN Gate servers over SSTP
+        run: |
+          mkdir out
+          javac -d out app/src/main/java/com/pickixo/vpn/sstp/*.java engine-tests/LiveProbe.java
+          timeout 900 java -cp out com.pickixo.vpn.sstp.LiveProbe ${{ github.event.inputs.servers || '40' }} || true
+          tail -3 probe-report.txt
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: probe-${{ github.run_number }}
+          name: Live probe ${{ github.run_number }}
+          prerelease: true
+          files: probe-report.txt

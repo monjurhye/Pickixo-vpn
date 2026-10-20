@@ -41,6 +41,21 @@ public final class SstpClient implements Closeable {
 
     public interface SocketProtector { boolean protect(Socket socket); }
 
+    /** Optional diagnostics sink (Logcat on Android, stdout in tests). Null = silent. */
+    public static volatile java.util.function.Consumer<String> debug;
+
+    private void d(String msg) {
+        java.util.function.Consumer<String> c = debug;
+        if (c != null) c.accept(host + ":" + port + " " + msg);
+    }
+
+    private static String hexDump(byte[] b, int off, int len) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = off; i < Math.min(b.length, off + Math.min(len, 64)); i++) sb.append(String.format("%02x", b[i] & 0xff));
+        if (len > 64) sb.append("…");
+        return sb.toString();
+    }
+
     public interface Listener {
         void onIpPacket(byte[] buf, int off, int len);
         void onClosed(String reason);
@@ -137,6 +152,7 @@ public final class SstpClient implements Closeable {
             if (protector != null && !protector.protect(raw)) throw new IOException("Could not protect socket");
             raw.connect(new InetSocketAddress(host, port), connectTimeoutMs);
             if (closed) throw new IOException("Cancelled");
+            d("tcp connected");
             raw.setTcpNoDelay(true);
             raw.setSoTimeout(handshakeTimeoutMs);
 
@@ -147,6 +163,7 @@ public final class SstpClient implements Closeable {
             byte[] der = chain[0].getEncoded();
             certHash256 = MessageDigest.getInstance("SHA-256").digest(der);
             certHash1 = MessageDigest.getInstance("SHA-1").digest(der);
+            d("tls " + ssl.getSession().getProtocol() + " " + ssl.getSession().getCipherSuite());
 
             if (closed) throw new IOException("Cancelled");
             in = new DataInputStream(new java.io.BufferedInputStream(ssl.getInputStream(), 16384));
@@ -267,6 +284,7 @@ public final class SstpClient implements Closeable {
             else state = (c == '\r') ? 1 : 0;
         }
         String status = head.toString("US-ASCII").split("\r\n", 2)[0];
+        d("http " + status);
         String[] parts = status.split(" ");
         if (parts.length < 2 || !parts[1].equals("200")) throw new IOException("Not an SSTP server (" + status + ")");
     }
@@ -288,6 +306,7 @@ public final class SstpClient implements Closeable {
                 }
             }
             if (bindingNonce == null) throw new IOException("Server sent no crypto binding request");
+            d("sstp call connect ack, hash mask " + bindingHashMask);
             return;
         }
         throw new IOException("No SSTP Call Connect Ack");
@@ -352,6 +371,7 @@ public final class SstpClient implements Closeable {
 
     private void handleControl(byte[] p) throws IOException {
         if (p.length < 8) return;
+        d("rx sstp control " + u16(p, 4));
         switch (u16(p, 4)) {
             case MSG_ECHO_REQUEST:
                 writeControl(MSG_ECHO_RESPONSE, null);
@@ -376,6 +396,7 @@ public final class SstpClient implements Closeable {
         if ((p[off] & 1) == 1) { proto = p[off] & 0xff; off += 1; } // protocol field compression
         else { if (p.length < off + 2) return; proto = u16(p, off); off += 2; }
 
+        if (proto != PROTO_IP) d(String.format("rx %04x %s", proto, hexDump(p, off, p.length - off)));
         if (proto == PROTO_IP) {
             Listener l = listener;
             boolean up;
@@ -680,6 +701,7 @@ public final class SstpClient implements Closeable {
     }
 
     private synchronized void fail(String reason) {
+        d("FAIL " + reason);
         if (failure == null) failure = reason;
         done.countDown();
         if (established) closeQuietly(reason);
@@ -692,6 +714,7 @@ public final class SstpClient implements Closeable {
     }
 
     private void sendCp(int proto, int code, int id, byte[] data) throws IOException {
+        d(String.format("tx %04x code=%d id=%d %s", proto, code, id, hexDump(data, 0, data.length)));
         byte[] f = new byte[4 + data.length];
         f[0] = (byte) code; f[1] = (byte) id; f[2] = (byte) (f.length >> 8); f[3] = (byte) f.length;
         System.arraycopy(data, 0, f, 4, data.length);
@@ -769,6 +792,7 @@ public final class SstpClient implements Closeable {
     }
 
     private void closeQuietly(String reason) {
+        d("closed: " + reason);
         boolean notify;
         synchronized (writeLock) {
             notify = !closed;
